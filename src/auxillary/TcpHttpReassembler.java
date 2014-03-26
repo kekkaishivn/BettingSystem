@@ -57,9 +57,9 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 
 			// should be known beforehand
 			this.timeout = timeout;
-			transferFrom(httpHeader); // copy fragment's Http header to our
+			//transferFrom(httpHeader); // copy fragment's Http header to our
 										// buffer
-			this.bytesCopiedIntoBuffer = httpHeader.getLength();
+			this.bytesCopiedIntoBuffer = 0; //httpHeader.getLength();
 			this.wholePacketLength = this.PDULength + httpHeader.getLength();
 		}
 
@@ -89,11 +89,12 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			this.bytesCopiedIntoBuffer += length;
 			if (this.debugLevel == Utils.ENUMLABEL.DEBUG_INFO) {
 				System.out.println("===========================");
-				System.out.println("TcpReaassembler - addSegment");
+				System.out.println("TcpReaassembler - addSegment - transfer to buffer");
 				System.out.println("packetOffset " + packetOffset);
 				System.out.println("length " + length);
 				System.out.println("assemblyOffset "
 						+ (assemblyOffset));
+				System.out.println("Sample string " + packet.getUTF8String(packetOffset, 10));
 			}
 			
 			packet.transferTo(this, packetOffset, length, assemblyOffset);
@@ -192,8 +193,8 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			// The packet will have a http header that contains a certain amount
 			// of data
 			// Therefore packet offset and len need to be updated
-			len -= httpHeader.getLength();
-			packetOffset += httpHeader.getLength();
+//			len -= httpHeader.getLength();
+//			packetOffset += httpHeader.getLength();
 			buffer = getBuffer(packet, httpHeader);
 		} else {
 			buffer = getBuffer(packet, null);
@@ -206,7 +207,8 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			System.out.println("tcp.seq() " + tcp.seq());
 			System.out.println("currentInitialOffset " + currentInitialOffset);
 		}
-		int assemblyOffset = (int) (tcp.seq() - currentInitialOffset + buffer.httpHeader.getLength());
+		int assemblyOffset = (int) (tcp.seq() - currentInitialOffset );
+								//+ buffer.httpHeader.getLength());
 		
 		System.out.println("buffer.httpHeader.getLength() " + buffer.httpHeader.getLength());
 		buffer.addSegment(packet, assemblyOffset, len, packetOffset);

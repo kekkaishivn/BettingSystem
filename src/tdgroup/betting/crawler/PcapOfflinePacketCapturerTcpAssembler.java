@@ -44,7 +44,7 @@ public class PcapOfflinePacketCapturerTcpAssembler extends
 					System.err.println("WARNING: missing fragments");
 				} else {
 					try {
-						System.out.println(buffer.getUTF8String(0, 1000));
+						System.out.println(buffer.getUTF8String(0, 3000));
 						writer.write(buffer.getUTF8String(0, 1000));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
