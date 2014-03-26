@@ -11,6 +11,7 @@ import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 
+import tdgroup.betting.crawler.HttpPacket;
 import tdgroup.betting.crawler.filter.NetworkFilter;
 import tdgroup.betting.util.Utils;
 
@@ -39,6 +40,8 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 		private long timeout;
 		private Utils.ENUMLABEL debugLevel;
 		private int wholePacketLength;
+		private HttpPacket httpPacket;
+		private HttpPacket.EncodingType encoding;
 
 		// private final int hash;
 
@@ -48,18 +51,18 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 		// }
 
 		public TcpHttpReassemblyBuffer(Http httpHeader, int size,
-				int PDULength, long timeout, Utils.ENUMLABEL debugLevel) {
+				int PDULength, HttpPacket.EncodingType encoding,
+				Utils.ENUMLABEL debugLevel) {
 			super(size);
 			this.httpHeader = httpHeader;
 			this.debugLevel = debugLevel;
 			// this.hash = hash;
 			this.PDULength = PDULength;
 
-			// should be known beforehand
-			this.timeout = timeout;
-			//transferFrom(httpHeader); // copy fragment's Http header to our
-										// buffer
-			this.bytesCopiedIntoBuffer = 0; //httpHeader.getLength();
+			this.encoding = encoding;
+			// transferFrom(httpHeader); // copy fragment's Http header to our
+			// buffer
+			this.bytesCopiedIntoBuffer = 0; // httpHeader.getLength();
 			this.wholePacketLength = this.PDULength + httpHeader.getLength();
 		}
 
@@ -74,7 +77,8 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			if (this.debugLevel == Utils.ENUMLABEL.DEBUG_INFO) {
 				System.out.println("===========================");
 				System.out.println("TcpReaassembler - isComplete");
-				System.out.println("wholePacketLength " + this.wholePacketLength);
+				System.out.println("wholePacketLength "
+						+ this.wholePacketLength);
 				System.out.println("bytesCopiedIntoBuffer "
 						+ this.bytesCopiedIntoBuffer);
 				if (this.wholePacketLength == this.bytesCopiedIntoBuffer) {
@@ -89,14 +93,15 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			this.bytesCopiedIntoBuffer += length;
 			if (this.debugLevel == Utils.ENUMLABEL.DEBUG_INFO) {
 				System.out.println("===========================");
-				System.out.println("TcpReaassembler - addSegment - transfer to buffer");
+				System.out
+						.println("TcpReaassembler - addSegment - transfer to buffer");
 				System.out.println("packetOffset " + packetOffset);
 				System.out.println("length " + length);
-				System.out.println("assemblyOffset "
-						+ (assemblyOffset));
-				System.out.println("Sample string " + packet.getUTF8String(packetOffset, 10));
+				System.out.println("assemblyOffset " + (assemblyOffset));
+				System.out.println("Sample string "
+						+ packet.getUTF8String(packetOffset, 10));
 			}
-			
+
 			packet.transferTo(this, packetOffset, length, assemblyOffset);
 		}
 
@@ -112,11 +117,26 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			return this.httpHeader;
 		}
 
+		public void buildHttpPacket() {
+			int bufferLength = this.wholePacketLength
+					- this.httpHeader.getLength();
+			JBuffer contentBuffer = new JBuffer(bufferLength);
+			this.transferTo(contentBuffer, this.httpHeader.getLength(),
+					bufferLength, 0);
+			this.httpPacket = new HttpPacket(this.httpHeader, contentBuffer,
+					bufferLength, this.encoding);
+		}
+
+		public HttpPacket getHttpPacket() {
+			return this.httpPacket;
+		}
+
 	}
 
 	private static final int DEFAULT_REASSEMBLY_SIZE = 8 * 1024; // 8k
 
 	private int currentContentLength;
+	private HttpPacket.EncodingType currentContentEncoding;
 
 	public static void main(String[] args) {
 
@@ -162,7 +182,7 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 	}
 
 	private void dispatch(TcpHttpReassemblyBuffer buffer) {
-		System.out.println("Dispatch here");
+		buffer.buildHttpPacket();
 		handler.nextTcpUdp(buffer);
 	}
 
@@ -171,7 +191,7 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			return currentBuffer;
 		currentBuffer = new TcpHttpReassemblyBuffer(http,
 				DEFAULT_REASSEMBLY_SIZE, this.currentContentLength,
-				http.hashCode(), this.debugLevel);
+				this.currentContentEncoding, this.debugLevel);
 
 		return currentBuffer;
 	}
@@ -180,21 +200,20 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 
 	private TcpHttpReassemblyBuffer bufferFragment(PcapPacket packet, Ip4 ip,
 			Tcp tcp) {
-		
 
 		// tcp related parameters
 
 		int len = ip.length() - ip.getHeaderLength() - tcp.getHeaderLength();
 		int packetOffset = tcp.getOffset() + tcp.getHeaderLength();
-		
+
 		TcpHttpReassemblyBuffer buffer;
 		if (packet.hasHeader(httpHeader)) {
 			// If it is the first packet in a UDP
 			// The packet will have a http header that contains a certain amount
 			// of data
 			// Therefore packet offset and len need to be updated
-//			len -= httpHeader.getLength();
-//			packetOffset += httpHeader.getLength();
+			// len -= httpHeader.getLength();
+			// packetOffset += httpHeader.getLength();
 			buffer = getBuffer(packet, httpHeader);
 		} else {
 			buffer = getBuffer(packet, null);
@@ -207,10 +226,11 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 			System.out.println("tcp.seq() " + tcp.seq());
 			System.out.println("currentInitialOffset " + currentInitialOffset);
 		}
-		int assemblyOffset = (int) (tcp.seq() - currentInitialOffset );
-								//+ buffer.httpHeader.getLength());
-		
-		System.out.println("buffer.httpHeader.getLength() " + buffer.httpHeader.getLength());
+		int assemblyOffset = (int) (tcp.seq() - currentInitialOffset);
+		// + buffer.httpHeader.getLength());
+
+		System.out.println("buffer.httpHeader.getLength() "
+				+ buffer.httpHeader.getLength());
 		buffer.addSegment(packet, assemblyOffset, len, packetOffset);
 
 		if (buffer.isComplete()) {
@@ -227,12 +247,23 @@ public class TcpHttpReassembler implements PcapPacketHandler<Object> {
 				// System.out.println(httpHeader.fieldValue(Http.Response.Content_Length));
 				this.currentContentLength = Integer.parseInt(httpHeader
 						.fieldValue(Http.Response.Content_Length));
+
+				String Content_Encoding_Field = httpHeader
+						.fieldValue(Http.Response.Content_Encoding);
+				if (Content_Encoding_Field == null) {
+					this.currentContentEncoding = HttpPacket.EncodingType.PLAIN;
+				} else if (Content_Encoding_Field.equals("gzip")) {
+					this.currentContentEncoding = HttpPacket.EncodingType.GZIP;
+				}
+
 				if (this.debugLevel == Utils.ENUMLABEL.DEBUG_INFO) {
 					System.out.println("==========================");
 					System.out
 							.println("TcpReassembler - detectNewInitialIncomingHttpPacket");
 					System.out.println("currentContentLength "
 							+ this.currentContentLength);
+					System.out.println("currentContentEncoding "
+							+ this.currentContentEncoding);
 					System.out.println("httpHeader length "
 							+ httpHeader.getLength());
 				}
