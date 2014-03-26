@@ -13,9 +13,9 @@ import org.jnetpcap.packet.JMemoryPacket;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.protocol.network.Ip4;
 
-import auxillary.IpReassembler;
-import auxillary.IpReassembler.IpReassemblyBuffer;
-import auxillary.IpReassembler.IpReassemblyBufferHandler;
+import tdgroup.betting.crawler.assembler.IpReassembler;
+import tdgroup.betting.crawler.assembler.IpReassembler.IpReassemblyBuffer;
+import tdgroup.betting.crawler.assembler.IpReassembler.IpReassemblyBufferHandler;
 
 public class PcapOfflinePacketCapturerIpAssembler extends
 		PcapOfflinePacketCapturer {
