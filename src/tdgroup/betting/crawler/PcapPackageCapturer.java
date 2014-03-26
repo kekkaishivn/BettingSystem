@@ -13,7 +13,6 @@ abstract class PcapPackageCapturer implements Connector {
 	NetworkFilter networkFilter = null;
 	public ByteArrayOutputStream outString = new ByteArrayOutputStream();
 	String outputFilename = null;
-	String source = null;
 	
 
 	public void setOutputFilename(String outputFilename) {
@@ -36,9 +35,7 @@ abstract class PcapPackageCapturer implements Connector {
 			throw new Exception(
 					"Compiling filter done.\n Setting filter failed.\n"
 							+ this.pCapturer.getErr());
-		} else {
-			this.setSource(networkFilter.getSource());
-		}
+		} 
 	}
 
 	private void setFilterFile(File filterConfigFile) {
@@ -63,7 +60,7 @@ abstract class PcapPackageCapturer implements Connector {
 		checkNullCapturer();
 		checkNullFilterFile();
 		networkFilter = NetworkFilter
-				.createNetworkFilter(this.filterConfigFile);
+				.getSingleton(this.filterConfigFile);
 		compileFilter();
 		setNetworkFilter();
 	}
@@ -75,9 +72,5 @@ abstract class PcapPackageCapturer implements Connector {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public void setSource(String source){
-		this.source = source;
 	}
 }

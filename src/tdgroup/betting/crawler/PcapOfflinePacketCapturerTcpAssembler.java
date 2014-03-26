@@ -8,22 +8,20 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 import org.jnetpcap.Pcap;
-import org.jnetpcap.nio.JMemory.Type;
-import org.jnetpcap.packet.JMemoryPacket;
-import org.jnetpcap.packet.JPacket;
-import org.jnetpcap.protocol.network.Ip4;
 
-import auxillary.TcpReassembler;
-import auxillary.TcpReassembler.TcpReassemblyBuffer;
-import auxillary.TcpReassembler.TcpReassemblyBufferHandler;
+import tdgroup.betting.util.Utils;
+import auxillary.TcpHttpReassembler;
+import auxillary.TcpHttpReassembler.TcpHttpReassemblyBuffer;
+import auxillary.TcpHttpReassembler.TcpReassemblyBufferHandler;
 
-public class PcapOfflinePacketCapturerTcpAssembler extends PcapOfflinePacketCapturer{
+public class PcapOfflinePacketCapturerTcpAssembler extends
+		PcapOfflinePacketCapturer {
 
 	public PcapOfflinePacketCapturerTcpAssembler(String filename) {
 		super(filename);
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public void connect() {
 		BufferedWriter writer = null;
 		try {
@@ -41,16 +39,13 @@ public class PcapOfflinePacketCapturerTcpAssembler extends PcapOfflinePacketCapt
 			}
 
 			@Override
-			public void nextTcpUdp(TcpReassemblyBuffer buffer) {
+			public void nextTcpUdp(TcpHttpReassemblyBuffer buffer) {
 				if (buffer.isComplete() == false) {
 					System.err.println("WARNING: missing fragments");
 				} else {
-					JPacket packet = new JMemoryPacket(Type.POINTER);
-					packet.peer(buffer);
-					packet.getCaptureHeader().wirelen(buffer.size());
-					packet.scan(Ip4.ID); // decode the packet
 					try {
-						writer.write(packet.toString());
+						System.out.println(buffer.getUTF8String(0, 1000));
+						writer.write(buffer.getUTF8String(0, 1000));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -58,8 +53,9 @@ public class PcapOfflinePacketCapturerTcpAssembler extends PcapOfflinePacketCapt
 				}
 			}
 		}
-		pCapturer.loop(Pcap.LOOP_INFINITE, new TcpReassembler(
-				new TcpReassemblyBufferHandlerPrintToWriter(writer)), null);
+		pCapturer.loop(Pcap.LOOP_INFINITE, new TcpHttpReassembler(
+				new TcpReassemblyBufferHandlerPrintToWriter(writer),
+				Utils.ENUMLABEL.DEBUG_INFO), null);
 		pCapturer.close();
 	}
 

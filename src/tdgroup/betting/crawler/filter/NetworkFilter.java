@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream.GetField;
 import java.util.Properties;
 
 import org.jnetpcap.PcapBpfProgram;
@@ -21,7 +22,9 @@ public class NetworkFilter {
 
 	static int USE_OPTIMIZATION = 1;
 	static int _8_BITS_MASK = 0xFFFFFF00;
-
+	private static File currentFilterFile;
+	static NetworkFilter singleton = null;
+	
 	private NetworkFilter(String expression, int optimize, int netmask,
 			String source) {
 		packetFilterProgram = new PcapBpfProgram();
@@ -29,6 +32,18 @@ public class NetworkFilter {
 		this.optimize = optimize;
 		this.netmask = netmask;
 		this.source = source;
+	}
+	
+	public static NetworkFilter getSingleton(File file){
+		if (file.equals(currentFilterFile) && singleton != null){
+			return singleton;
+		}
+		singleton = createNetworkFilter(file);
+		return singleton;
+	}
+	
+	public static NetworkFilter getSingleton(){
+		return singleton;
 	}
 
 	public PcapBpfProgram getPacketFilterProgram() {
@@ -47,12 +62,8 @@ public class NetworkFilter {
 		return netmask;
 	}
 
-	public static NetworkFilter createNetworkFilter(String expression,
-			int optimize, int netmask, String source) {
-		return new NetworkFilter(expression, optimize, netmask, source);
-	}
 
-	public static NetworkFilter createNetworkFilter(File file) {
+	private static NetworkFilter createNetworkFilter(File file) {
 		// create and load default properties
 		Properties defaultProps = new Properties();
 		FileInputStream inputStream;
@@ -60,6 +71,7 @@ public class NetworkFilter {
 			inputStream = new FileInputStream(file);
 			defaultProps.load(inputStream);
 			inputStream.close();
+			currentFilterFile = file;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -102,8 +114,13 @@ public class NetworkFilter {
 		return new NetworkFilter(expression, optimize, netmask, source);
 	}
 
-	public String getSource() {
-		return source;
+	public int[] getSource() {
+		String[] splittedString = source.split("\\.");
+		int[] splittedSources = new int[4];
+		for (int i = 0; i < 4; i++) {
+			splittedSources[i] = Integer.parseInt(splittedString[i]);
+		}
+		return splittedSources;
 	}
 
 	public void setSource(String source) {
