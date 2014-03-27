@@ -9,10 +9,10 @@ import java.io.UnsupportedEncodingException;
 
 import org.jnetpcap.Pcap;
 
+import tdgroup.betting.crawler.assembler.TcpHttpReassembler;
+import tdgroup.betting.crawler.assembler.TcpHttpReassembler.TcpHttpReassemblyBuffer;
+import tdgroup.betting.crawler.assembler.TcpHttpReassembler.TcpReassemblyBufferHandler;
 import tdgroup.betting.util.Utils;
-import auxillary.TcpHttpReassembler;
-import auxillary.TcpHttpReassembler.TcpHttpReassemblyBuffer;
-import auxillary.TcpHttpReassembler.TcpReassemblyBufferHandler;
 
 public class PcapOfflinePacketCapturerTcpAssembler extends
 		PcapOfflinePacketCapturer {

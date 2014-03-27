@@ -1,4 +1,4 @@
-package auxillary;
+package tdgroup.betting.crawler.assembler;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.nio.JBuffer;

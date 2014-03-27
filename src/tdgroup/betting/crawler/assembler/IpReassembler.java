@@ -1,4 +1,4 @@
-package auxillary;
+package tdgroup.betting.crawler.assembler;
 
 import java.util.HashMap;
 import java.util.Map;
