@@ -1,0 +1,1 @@
+$M('ticket').onUpdate(['Football',"Romania Timisoreana Cup",'Steaua Bucuresti','Dinamo Bucuresti', 'Over\x2fUnder',3,['Over/Under : 2',0,0],'','Under','0.78','',1,3,1000,1,'1',0,'True','False',0,'4','','',0,0,17726251,1,'a',548998,-1,-1,-1,0], '0', 0, 1.20000000); 

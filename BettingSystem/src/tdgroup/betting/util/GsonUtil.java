@@ -13,10 +13,19 @@ public class GsonUtil {
 			Iterator<JsonElement> iter = node.getAsJsonArray().iterator();
 			while (iter.hasNext())	{
 				JsonElement element = iter.next();
-				if (element.isJsonNull())	{
+				if (element.isJsonArray())	{
+					System.out.println("Array");
+					printJsonNode(element);
+					System.out.println("Endarray");					
+				} else {
+					printJsonNode(element);
+				}
+			}			
+		} else {
+				if (node.isJsonNull())	{
 					System.out.println("null");
-				} if (element.isJsonPrimitive())	{
-					JsonPrimitive primitive = element.getAsJsonPrimitive();
+				} if (node.isJsonPrimitive())	{
+					JsonPrimitive primitive = node.getAsJsonPrimitive();
 					if (primitive.isBoolean())	{
 						System.out.println(primitive.getAsBoolean());
 					} else if (primitive.isNumber())	{
@@ -24,12 +33,7 @@ public class GsonUtil {
 					} else if (primitive.isString())	{
 						System.out.println(primitive.getAsString());
 					}
-				} else if (element.isJsonArray())	{
-					System.out.println("Array");
-					printJsonNode(element);
-					System.out.println("Endarray");					
-				}
-			}			
+			}
 		}
 
 	}
