@@ -1,0 +1,55 @@
+<script type="text/javascript" >
+var Data={
+'lblSportKind':'Soccer',
+'lblBetKind':'Over/Under',
+'lblHome':'Napoli', 
+'lblAway':'Juventus',
+'lblLeaguename':'*ITALY SERIE A',
+'lblBetKindValue':'2.25',
+'lblOddsValue':'-0.66',
+'lblPlaceOddsValue':'{{lblPlaceOddsValue}}',
+'lblOddsColor':'FavOddsClassBetProcess',
+'lblScore':'Score',
+'lblScoreValue':'[1-0]',
+'hideTicketBox':'',
+'liveBgColor':'#FFCCBC',
+'lblChoiceClass':'FavTeamClass',
+'lblChoiceValue':'Over',
+'lblMinBetValue':'3',
+'hiddenStakeRequest':'',
+'hiddenOddsRequest':'-0.68',
+'hiddenMinBet':'3',
+'hiddenMaxBet':'1,000',
+'hiddenBetType':'3',
+'lblMaxBetValue':'1,000',
+'lbloddsStatus':'running',
+'lbloddsStatusClass':'',
+'lblhdp1Value':'0',
+'lblhdp2Value':'0',
+'lblLiveScoreH':'0',
+'lblLiveScoreA':'0',
+'lblReadyOnly':'',
+'lblhedgeBox':'none',
+'hiddenliveIndicator':'0',
+'hiddenSportType':'1',
+'imgHorseJockey':'',
+'chk_BettingChange':'1',
+'hiddenOddsType':'4',
+'lblAutoAccept':'',
+'lblAcceptBetterOdds':'1',
+'confirmMode':'{{confirmMode}}',
+'matchid':'8206862',
+'OddsStakeChg':'0',
+'HasScoreMap':'0',
+'isAutoLoad':'',
+'singleBetData':""
+
+};
+parent.SetBetProcessData(Data);
+if (false)
+{
+    parent.OpenMask();
+    parent.updateMultiTitle();
+    parent.FocusInputBox(); 
+}
+</script>

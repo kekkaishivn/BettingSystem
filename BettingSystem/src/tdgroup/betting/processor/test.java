@@ -14,9 +14,15 @@ public class test {
 	public static void main(String[] args) throws UnsupportedResponseFormatException, IOException {
 		// TODO Auto-generated method stub
 		BetUpdateEventHandler handler = new BetUpdateEventHandlerImpl();
-		//handler.onReceiveSbobetOddDisplayUpdate(readFile("today-data_test2.txt"));
+		//handler.onReceiveSbobetHandicapOddDisplayUpdate(readFile("today-data_test2.txt"));
 		//handler.onReceiveSbobetOddDisplayUpdate(BetUpdateEventHandlerImpl.data);
-		handler.onReceiveSbobetTicketUpdate(readFile("ticket-data_test3.txt"));
+		//handler.onReceiveHandicapSbobetTicketUpdate(readFile("ticket-data_test3.txt"));
+		//handler.onReceiveIbetOddsValueUpdate(readFile("ibet-underover_newearly_test.txt"));
+		String data = readFile("today-data_test2.txt");
+		
+		long before = System.currentTimeMillis();
+		handler.onReceiveSbobetHandicapOddsDisplayUpdate(data);
+		System.out.println("Processing time:" + (System.currentTimeMillis()-before));
 	}
 	
 	static String readFile(String fileName) throws IOException {
@@ -34,6 +40,6 @@ public class test {
     } finally {
         br.close();
     }
-}
+	}
 
 }
